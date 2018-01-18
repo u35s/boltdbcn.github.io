@@ -337,7 +337,7 @@ func (*Bucket) CreateBucket(key []byte) (*Bucket, error)
 func (*Bucket) CreateBucketIfNotExists(key []byte) (*Bucket, error)
 func (*Bucket) DeleteBucket(key []byte) error
         </pre>
-        <p>如果你是一个多用户应用程序，其中根级别的bucket存储许多本身就是bucket的账号，。在账户bucket中，您可以有许多与账号本身(用户、Notes等)相关的bucket，将信息隔离到逻辑分组中。</p>
+        <p>如果你是一个多用户应用程序，其中根级别的bucket存储许多本身就是bucket的账号。在账户bucket中，您可以有许多与账号本身(用户、Notes等)相关的bucket，将信息隔离到逻辑分组中。</p>
         <pre class="prettyprint">
 // createUser creates a new user in the given account.
 func createUser(accountID int, u *User) error {
@@ -381,7 +381,7 @@ func createUser(accountID int, u *User) error {
 }
         </pre>
 
-        <h3 class="数据备份"></h3>
+		<h3>数据备份</h3>
         <p>Bolt是一个单独的文件，所以很容易备份。可以使用Tx.WriteTo()函数将数据库的一致视图写入Writer。如果您从一个只读事务中调用这个，它将执行一个热备份，而不会阻塞您的其他数据库读写。</p>
         <p>默认情况下，它将使用一个常规的文件句柄来使用操作系统的页面缓存。请参阅Tx文档，了解关于优化大于ram数据集的信息。</p>
         <p>一个常见的用例是通过HTTP进行备份，这样您就可以使用curl这样的工具进行数据库备份:</p>
@@ -406,7 +406,7 @@ func BackupHandleFunc(w http.ResponseWriter, req *http.Request) {
 
         <h3>统计</h3>
         <p>数据库保存了它执行的许多内部操作的运行计数，这样您就可以更好地理解发生了什么。通过在两个时间点抓取这些数据的快照，我们可以看到在那个时间范围内执行了什么操作。</p>
-        <p>例如，我们可以每隔10秒启动一个goroutine日志记录:</p>
+		<p>例如，我们可以启动一个goroutine每隔10秒记录日志:</p>
         <pre class="prettyprint">
 go func() {
     // Grab the initial stats.
