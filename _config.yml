@@ -1,0 +1,8 @@
+author: u35s
+email: jintao7080@gmail.com
+title: BoltDB中文网
+description: > # this means to ignore newlines until "baseurl:"
+  boltdb中文网提供boltdb完整使用教程,源码分析,让你对boltdb及数据库有更深刻的理解
+
+markdown: kramdown
+host: 0.0.0.0
