@@ -15,12 +15,12 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
-  <meta name="keywords" content="boltdb中文网,boltdb中文教程,键值对数据库,开源项目" />
-  <meta name="description" content="boltdb中文网提供boltdb完整使用教程,源码分析,让你对boltdb及数据库有更深刻的理解">
+  <meta name="keywords" content="boltdb实现机制分析" />
+  <meta name="description" content="boltdb中文网">
   <meta name="author" content="u35s">
   <!--<link rel="icon" href="./favicon.ico">-->
 
-  <title>首页</title>
+  <title>boltdb实现机制分析</title>
 
   <!-- Bootstrap core CSS -->
   <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
@@ -54,54 +54,47 @@
       </div>
       <div id="navbar" class="navbar-collapse collapse">
         <ul class="nav navbar-nav navbar-right hidden-sm">
-          <li>
+          <li> 
             <a href="/runtime.html">实现分析</a>
           </li>
           <li>
             <a href="https://github.com/u35s/bolt">中文翻译</a>
           </li>
-          <li>
+          <li class="active">
             <a href="/about.html">关于</a>
-          </i>
+          </li>
         </ul>
       </div>
     </div>
   </nav>
 
-  <div class="jumbotron masthead">
+  <div class="content">
     <div class="container">
-      <h1>BoltDB</h1>
-      <h2>最好的现代键值对数据库</h2>
-      <p>bolt是一个存粹的go语言版的key/value存储。它的目标是为项目提供一个简单、高效、可靠的嵌入式数据库,如此低级别的功能模块,简单是关键,所以bollt的API很小并且仅仅关注geting和seting</p>
-      <br><br>
-      <p>
-        <a class="btn btn-success btn-lg" href="./quickstart.html" role="button">快速开始</a>
-      </p>
+        <h3>BoltDB实现机制分析</h3>
+
+		<h4>Bolt</h4>
+		<p>Bolt是根据Howard Chu的LMDB项目开发的一个存粹的go语言版的key/value存储.
+		它的目标是为项目提供一个简单、高效、可靠的嵌入式数据库而不是要求一个完成的数据库服务器，例如Postgres和MySQL.
+		用作者的话说,Bolt只提供简单key/value存储,没有其他的特性,以后也不会有,加上Bolt原本的代码精简,质量高,很适合作为对数据库工作原理的感兴趣的同学的第一选择</p>
+
+		<h4>Bolt的实现</h4>
+		<ul>
+				<li>Bolt使用操作体统提供的mmap技术避免I/O操作,使文件读取效率提高。</li>
+				<li>使用单写多读,写时复制实现无锁MVCC</li>
+				<li>内部使用B+树实现高性能随机读</li>
+		</ul>
+		
+		<h4>主要的数据结构</h4>	
+		<p>Bolt的主要数据结构有DB,Bucket,Tx,Cursor,node,inode,page</p>
+		<p>DB表示数据库中的Bucket集合,Bucket表示数据库中的键值对集合,好比DB是Mysql,Bucket是Mysql中的一张表,键值对对应Mysql表中的一行数据. Cursor表示一个迭代器,该迭代器可以按顺序遍历bucket中的所有键/值对. Tx表示数据库中的一个只读或读写事务,只读事务可以用来创建Cursor,检索数据,读写事务还可以创建,删除Bucket和键. node表示一个在内存中的反序列化的page,inode是一个node中的内部节点,可以用来指向page中的元素或者还未被被添加到page中的元素。通常说的键值对就对应一个inode.</p>
+
+		<h4>存储过程</h4>
+		<p>不管是添加,删除还是读取,都需要先打开数据库,并获取一个事务,读事务中不允许进行任更改,只能检索bucket、检索值. 在读写事务结束时如果没有错误则提交事务,对应数据被更改,否则事务期间的所有的更改都被丢弃.不管是读取，删除还是写入,都需要通过Cursor来找到对应键的位置信息.如果是读取,比较对应位置的键和目标键是否相等,相等则找到并且返回,不相等则不存在返回nil.如果是删除,也比较对应位置的键和目标键是否相等,相等则删除对应数据.添加的话则在对应的位置插入对应值.</p>
+		<p>其中查找特定键的实现是用B+树。在提交事务时,如果有删除操作则检查是否需要重新平衡,如果有数据更改则写入到Dirty Page,写入时检测是否有node需要拆分.其中着重说明的是有数据更新的话并且数据长度不一致,很可能导致数据所在Page的改变(默认情况下Bolt的Page在使用%50时就会切页,大数据块也可能占据连续的几页达到100%),这一块的代码很值得一读,会使你对B+树的使用,还有数据的实际存储有更深刻的理解,也会对平常说的分表提升性能(减少了更改数据时整个数据的移动)有更进一步的认识</p>
+
+
     </div>
   </div>
-
-  <div class="feature">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-4">
-          <h2>简单</h2>
-          <p>API很少</p>
-          <p>代码不超过3k</p>
-        </div>
-        <div class="col-md-4">
-          <h2>高效</h2>
-          <p>写时拷贝,无log</p>
-          <p>读取和恢复速度快</p>
-        </div>
-        <div class="col-md-4">
-          <h2>可靠</h2>
-          <p>线程安全</p>
-          <p>支持ACID事务</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
 
   <footer class="footer">
     <div class="container">
@@ -133,7 +126,7 @@
             <div class="col-sm-3">
                 <p>关于</p>
                 <ul class="list-unstyled">
-                  <li><a href="/about.html" target="_blank">关于我们</a></li>
+                  <li><a href="#" target="_blank">关于我们</a></li>
                   <li><a href="#" target="_blank">友情链接</a></li>
                 </ul>
             </div>
