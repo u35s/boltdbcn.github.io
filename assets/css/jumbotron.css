@@ -9,12 +9,12 @@
 .jumbotron{
   margin-bottom: 0px;
   background-color: #f8f8f8;
+  text-align: center;
 }
 body {
   font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
   color: #7f8c8d;
   background-color:#334a4c;
-	text-align: center;
 }
 /*nav*/
 .navbar{
@@ -29,13 +29,13 @@ body {
 .content{
   width: 100%;
   background: #fff;
-  text-align: left;
 }
 /*content*/
 /*featue*/
 .feature{
   width: 100%;
   background-color: #f8f8f8;
+	text-align: center;
 }
 .feature h2{
   color: #42b983;
